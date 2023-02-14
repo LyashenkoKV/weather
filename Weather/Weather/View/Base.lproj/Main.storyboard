@@ -17,20 +17,33 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="MZR-1d-aEL">
-                                <rect key="frame" x="0.0" y="103" width="393" height="715"/>
+                                <rect key="frame" x="0.0" y="408" width="393" height="410"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="50u-Qs-eJd">
+                                <rect key="frame" x="0.0" y="103" width="393" height="297"/>
+                                <color key="backgroundColor" systemColor="systemBrownColor"/>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="MZR-1d-aEL" firstAttribute="top" secondItem="50u-Qs-eJd" secondAttribute="bottom" constant="8" symbolic="YES" id="PHO-Ig-Md8"/>
                             <constraint firstItem="MZR-1d-aEL" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="R3Y-jA-4ij"/>
-                            <constraint firstItem="MZR-1d-aEL" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="ayg-Id-NaT"/>
+                            <constraint firstItem="50u-Qs-eJd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Xre-br-lOZ"/>
+                            <constraint firstItem="50u-Qs-eJd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="eUs-F7-l3l"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="50u-Qs-eJd" secondAttribute="trailing" id="fv2-zh-28F"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="MZR-1d-aEL" secondAttribute="bottom" id="vzC-zt-6mU"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="MZR-1d-aEL" secondAttribute="trailing" id="wxz-7B-kql"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="AR6-Nq-8Nu"/>
+                    <navigationItem key="navigationItem" id="AR6-Nq-8Nu">
+                        <nil key="title"/>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="search" id="HwO-0i-Qc1"/>
+                            <barButtonItem title="Item" image="location" catalog="system" id="i7h-MR-BDN"/>
+                        </rightBarButtonItems>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -56,8 +69,12 @@
         </scene>
     </scenes>
     <resources>
+        <image name="location" catalog="system" width="128" height="121"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBrownColor">
+            <color red="0.63529411764705879" green="0.51764705882352946" blue="0.36862745098039218" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
