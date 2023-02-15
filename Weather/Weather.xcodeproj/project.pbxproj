@@ -15,6 +15,7 @@
 		24100436299BFCF7004BE66C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24100434299BFCF7004BE66C /* LaunchScreen.storyboard */; };
 		24100443299BFEDB004BE66C /* WeatherTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24100441299BFEDB004BE66C /* WeatherTableViewCell.swift */; };
 		24100444299BFEDB004BE66C /* WeatherTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 24100442299BFEDB004BE66C /* WeatherTableViewCell.xib */; };
+		24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 24100445299CB670004BE66C /* CoreData.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		24100437299BFCF7004BE66C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24100441299BFEDB004BE66C /* WeatherTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherTableViewCell.swift; sourceTree = "<group>"; };
 		24100442299BFEDB004BE66C /* WeatherTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WeatherTableViewCell.xib; sourceTree = "<group>"; };
+		24100446299CB670004BE66C /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 				24100432299BFCF7004BE66C /* Assets.xcassets */,
 				24100434299BFCF7004BE66C /* LaunchScreen.storyboard */,
 				24100437299BFCF7004BE66C /* Info.plist */,
+				24100445299CB670004BE66C /* CoreData.xcdatamodeld */,
 			);
 			path = Weather;
 			sourceTree = "<group>";
@@ -179,6 +182,7 @@
 			files = (
 				24100443299BFEDB004BE66C /* WeatherTableViewCell.swift in Sources */,
 				2410042E299BFCF6004BE66C /* ViewController.swift in Sources */,
+				24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */,
 				2410042A299BFCF6004BE66C /* AppDelegate.swift in Sources */,
 				2410042C299BFCF6004BE66C /* SceneDelegate.swift in Sources */,
 			);
@@ -396,6 +400,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		24100445299CB670004BE66C /* CoreData.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				24100446299CB670004BE66C /* CoreData.xcdatamodel */,
+			);
+			currentVersion = 24100446299CB670004BE66C /* CoreData.xcdatamodel */;
+			path = CoreData.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 2410041E299BFCF6004BE66C /* Project object */;
 }
