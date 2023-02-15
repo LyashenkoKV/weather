@@ -31,6 +31,9 @@
                                                 <color key="tintColor" red="0.1058823529" green="0.26274509800000001" blue="0.28235294119999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="location" catalog="system"/>
+                                                <connections>
+                                                    <action selector="currentLocationButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eX5-3p-7UA"/>
+                                                </connections>
                                             </button>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="BG0-XG-f70">
                                                 <rect key="frame" x="50" y="0.0" width="236" height="40"/>
@@ -46,11 +49,17 @@
                                                 <color key="tintColor" red="0.1058823529" green="0.26274509800000001" blue="0.28235294119999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="magnifyingglass" catalog="system"/>
+                                                <connections>
+                                                    <action selector="searchButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="A5h-Ne-dkd"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K2Z-vk-uQm">
                                                 <rect key="frame" x="346" y="0.0" width="47" height="40"/>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="plus" catalog="system"/>
+                                                <connections>
+                                                    <action selector="addDataButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="83Q-kf-i8i"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="tintColor" red="0.1058823529" green="0.26274509800000001" blue="0.28235294119999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -116,6 +125,13 @@
                             <constraint firstItem="fOa-LD-Zfi" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="qdz-KF-5p0"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="cityNameLabel" destination="4Vq-F2-Vh1" id="d3e-mD-den"/>
+                        <outlet property="myTableView" destination="Wno-PK-O6z" id="MaF-2z-vgE"/>
+                        <outlet property="searchTextField" destination="BG0-XG-f70" id="X5I-3C-rvI"/>
+                        <outlet property="temperatureLabel" destination="9Xl-hF-jJX" id="Anj-JU-uoU"/>
+                        <outlet property="weatherImageView" destination="e7G-Ru-dq6" id="L4b-Tp-yD7"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
