@@ -75,6 +75,11 @@
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="cityNameLabel" destination="Kub-vj-DW7" id="cxr-Bs-5KR"/>
+                <outlet property="tempLabel" destination="Ptn-bo-ML6" id="Wuy-Ua-e6F"/>
+                <outlet property="weatherImage" destination="a1P-U5-lT3" id="hYP-xs-Ijj"/>
+            </connections>
             <point key="canvasLocation" x="171.75572519083968" y="-95.422535211267615"/>
         </tableViewCell>
     </objects>

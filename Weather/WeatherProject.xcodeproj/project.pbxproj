@@ -16,10 +16,11 @@
 		24100443299BFEDB004BE66C /* WeatherTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24100441299BFEDB004BE66C /* WeatherTableViewCell.swift */; };
 		24100444299BFEDB004BE66C /* WeatherTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 24100442299BFEDB004BE66C /* WeatherTableViewCell.xib */; };
 		24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 24100445299CB670004BE66C /* CoreData.xcdatamodeld */; };
+		24100449299D205F004BE66C /* WeatherData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24100448299D205F004BE66C /* WeatherData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		24100426299BFCF6004BE66C /* Weather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Weather.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		24100426299BFCF6004BE66C /* WeatherProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		24100429299BFCF6004BE66C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2410042B299BFCF6004BE66C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2410042D299BFCF6004BE66C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -30,6 +31,7 @@
 		24100441299BFEDB004BE66C /* WeatherTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherTableViewCell.swift; sourceTree = "<group>"; };
 		24100442299BFEDB004BE66C /* WeatherTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WeatherTableViewCell.xib; sourceTree = "<group>"; };
 		24100446299CB670004BE66C /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
+		24100448299D205F004BE66C /* WeatherData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,7 +48,7 @@
 		2410041D299BFCF6004BE66C = {
 			isa = PBXGroup;
 			children = (
-				24100428299BFCF6004BE66C /* Weather */,
+				24100428299BFCF6004BE66C /* WeatherProject */,
 				24100427299BFCF6004BE66C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,12 +56,12 @@
 		24100427299BFCF6004BE66C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				24100426299BFCF6004BE66C /* Weather.app */,
+				24100426299BFCF6004BE66C /* WeatherProject.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		24100428299BFCF6004BE66C /* Weather */ = {
+		24100428299BFCF6004BE66C /* WeatherProject */ = {
 			isa = PBXGroup;
 			children = (
 				24100440299BFE35004BE66C /* WeatherCell */,
@@ -73,12 +75,13 @@
 				24100437299BFCF7004BE66C /* Info.plist */,
 				24100445299CB670004BE66C /* CoreData.xcdatamodeld */,
 			);
-			path = Weather;
+			path = WeatherProject;
 			sourceTree = "<group>";
 		};
 		2410043D299BFDBC004BE66C /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				24100448299D205F004BE66C /* WeatherData.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -111,9 +114,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		24100425299BFCF6004BE66C /* Weather */ = {
+		24100425299BFCF6004BE66C /* WeatherProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2410043A299BFCF7004BE66C /* Build configuration list for PBXNativeTarget "Weather" */;
+			buildConfigurationList = 2410043A299BFCF7004BE66C /* Build configuration list for PBXNativeTarget "WeatherProject" */;
 			buildPhases = (
 				24100422299BFCF6004BE66C /* Sources */,
 				24100423299BFCF6004BE66C /* Frameworks */,
@@ -123,9 +126,9 @@
 			);
 			dependencies = (
 			);
-			name = Weather;
+			name = WeatherProject;
 			productName = Weather;
-			productReference = 24100426299BFCF6004BE66C /* Weather.app */;
+			productReference = 24100426299BFCF6004BE66C /* WeatherProject.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -143,7 +146,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 24100421299BFCF6004BE66C /* Build configuration list for PBXProject "Weather" */;
+			buildConfigurationList = 24100421299BFCF6004BE66C /* Build configuration list for PBXProject "WeatherProject" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -156,7 +159,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				24100425299BFCF6004BE66C /* Weather */,
+				24100425299BFCF6004BE66C /* WeatherProject */,
 			);
 		};
 /* End PBXProject section */
@@ -184,6 +187,7 @@
 				2410042E299BFCF6004BE66C /* ViewController.swift in Sources */,
 				24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */,
 				2410042A299BFCF6004BE66C /* AppDelegate.swift in Sources */,
+				24100449299D205F004BE66C /* WeatherData.swift in Sources */,
 				2410042C299BFCF6004BE66C /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -332,7 +336,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Weather/Info.plist;
+				INFOPLIST_FILE = WeatherProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -359,7 +363,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Weather/Info.plist;
+				INFOPLIST_FILE = WeatherProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -381,7 +385,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		24100421299BFCF6004BE66C /* Build configuration list for PBXProject "Weather" */ = {
+		24100421299BFCF6004BE66C /* Build configuration list for PBXProject "WeatherProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				24100438299BFCF7004BE66C /* Debug */,
@@ -390,7 +394,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2410043A299BFCF7004BE66C /* Build configuration list for PBXNativeTarget "Weather" */ = {
+		2410043A299BFCF7004BE66C /* Build configuration list for PBXNativeTarget "WeatherProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2410043B299BFCF7004BE66C /* Debug */,
