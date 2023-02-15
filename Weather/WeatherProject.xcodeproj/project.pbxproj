@@ -18,6 +18,7 @@
 		24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 24100445299CB670004BE66C /* CoreData.xcdatamodeld */; };
 		24100449299D205F004BE66C /* WeatherData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24100448299D205F004BE66C /* WeatherData.swift */; };
 		2410044B299D2855004BE66C /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2410044A299D2855004BE66C /* WeatherModel.swift */; };
+		2410044D299D29AF004BE66C /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2410044C299D29AF004BE66C /* WeatherManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		24100446299CB670004BE66C /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		24100448299D205F004BE66C /* WeatherData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherData.swift; sourceTree = "<group>"; };
 		2410044A299D2855004BE66C /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
+		2410044C299D29AF004BE66C /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			children = (
 				24100448299D205F004BE66C /* WeatherData.swift */,
 				2410044A299D2855004BE66C /* WeatherModel.swift */,
+				2410044C299D29AF004BE66C /* WeatherManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -188,6 +191,7 @@
 			files = (
 				24100443299BFEDB004BE66C /* WeatherTableViewCell.swift in Sources */,
 				2410042E299BFCF6004BE66C /* ViewController.swift in Sources */,
+				2410044D299D29AF004BE66C /* WeatherManager.swift in Sources */,
 				24100447299CB670004BE66C /* CoreData.xcdatamodeld in Sources */,
 				2410044B299D2855004BE66C /* WeatherModel.swift in Sources */,
 				2410042A299BFCF6004BE66C /* AppDelegate.swift in Sources */,
