@@ -18,6 +18,13 @@ class ViewController: UIViewController {
     
     var weatherManager = WeatherManager()
     var locationManager = CLLocationManager()
+    var conditionName: String?
+    
+    private var data: [DataModel] = DataModel.loadData() {
+        didSet {
+            DataModel.save(data)
+        }
+    }
     
 
     override func viewDidLoad() {
@@ -32,7 +39,10 @@ class ViewController: UIViewController {
         
         let nib = UINib(nibName: "WeatherTableViewCell", bundle: nil)
         myTableView.register(nib, forCellReuseIdentifier: "xibCellId")
+        
         myTableView.delegate = self
+        myTableView.dataSource = self
+        
     }
     
     @IBAction func currentLocationButton(_ sender: UIButton) {
@@ -46,26 +56,40 @@ class ViewController: UIViewController {
     
     @IBAction func addDataButton(_ sender: UIButton) {
         
+        let addData = DataModel(name: cityNameLabel.text ?? "",
+                                temp: temperatureLabel.text ?? "",
+                                conditionName: conditionName ?? "")
+        self.data.append(addData)
+        
+        print(data)
+        print(addData)
+        myTableView.reloadData()
     }
     
 }
 
-// MARK: - UITableViewDelegate
-extension ViewController: UITableViewDelegate {
-    
-}
 
-// MARK: - UITableViewDataSource
-extension ViewController: UITableViewDataSource {
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return data.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "xibCellId", for: indexPath) as! WeatherTableViewCell
+        cell.configure(data[indexPath.row])
         
         return cell
     }
+    
+    // delete rows
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            data.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+    
 }
 
 // MARK: - UITextFieldDelegate
@@ -99,6 +123,7 @@ extension ViewController: WeatherManagerDelegate {
         temperatureLabel.text = weather.temperatureString
         weatherImageView.image = UIImage(systemName: weather.conditionName)
         cityNameLabel.text = weather.cityName
+        self.conditionName = weather.conditionName
     }
     
     func didFailWithError(error: Error) {
