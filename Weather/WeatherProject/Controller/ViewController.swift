@@ -9,7 +9,6 @@ import UIKit
 import CoreLocation
 
 class ViewController: UIViewController {
-    
     @IBOutlet weak var weatherImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityNameLabel: UILabel!
@@ -18,7 +17,8 @@ class ViewController: UIViewController {
     
     var weatherManager = WeatherManager()
     var locationManager = CLLocationManager()
-    var conditionName: String?
+    var id: Int?
+    let refreshControl = UIRefreshControl()
     
     private var data: [DataModel] = DataModel.loadData() {
         didSet {
@@ -26,23 +26,26 @@ class ViewController: UIViewController {
         }
     }
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.delegate = self
-        locationManager.requestLocation()
-        
-        searchTextField.delegate = self
-        weatherManager.delegate = self
-        
-        let nib = UINib(nibName: "WeatherTableViewCell", bundle: nil)
-        myTableView.register(nib, forCellReuseIdentifier: "xibCellId")
         
         myTableView.delegate = self
         myTableView.dataSource = self
         
+        let nib = UINib(nibName: "WeatherTableViewCell", bundle: nil)
+        myTableView.register(nib, forCellReuseIdentifier: "xibCellId")
+        
+        refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
+        myTableView.addSubview(refreshControl)
+        view.addVerticalGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
+        
+        searchTextField.delegate = self
+        weatherManager.delegate = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        setupLocation()
     }
     
     @IBAction func currentLocationButton(_ sender: UIButton) {
@@ -55,19 +58,18 @@ class ViewController: UIViewController {
     }
     
     @IBAction func addDataButton(_ sender: UIButton) {
-        
-        let addData = DataModel(name: cityNameLabel.text ?? "",
-                                temp: temperatureLabel.text ?? "",
-                                conditionName: conditionName ?? "")
+        guard let id = id else { return }
+        let addData = DataModel(name: cityNameLabel.text ?? "", id: id)
         self.data.append(addData)
-        
-        print(data)
-        print(addData)
         myTableView.reloadData()
     }
     
+    // Function for handling pull-to-refresh event
+    @objc private func refreshTable() {
+        myTableView.reloadData()
+        refreshControl.endRefreshing()
+    }
 }
-
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
@@ -77,8 +79,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "xibCellId", for: indexPath) as! WeatherTableViewCell
+        //cell.isUserInteractionEnabled = false
         cell.configure(data[indexPath.row])
-        
         return cell
     }
     
@@ -89,7 +91,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
-    
 }
 
 // MARK: - UITextFieldDelegate
@@ -120,10 +121,10 @@ extension ViewController: UITextFieldDelegate {
 // MARK: - WeatherManagerDelegate
 extension ViewController: WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
+        id = weather.id
         temperatureLabel.text = weather.temperatureString
         weatherImageView.image = UIImage(systemName: weather.conditionName)
         cityNameLabel.text = weather.cityName
-        self.conditionName = weather.conditionName
     }
     
     func didFailWithError(error: Error) {
@@ -133,7 +134,6 @@ extension ViewController: WeatherManagerDelegate {
 
 // MARK: - CLLocationManagerDelegate
 extension ViewController: CLLocationManagerDelegate {
-    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
             locationManager.stopUpdatingLocation()
@@ -147,4 +147,9 @@ extension ViewController: CLLocationManagerDelegate {
         print("Failed to find user's location: \(error.localizedDescription)")
     }
     
+    func setupLocation() {
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.delegate = self
+        locationManager.requestLocation()
+    }
 }
