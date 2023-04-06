@@ -9,11 +9,10 @@ import Foundation
 
 struct DataModel: Codable {
     var name: String
-    var temp: String
-    var conditionName: String
-
+    var id: Int
 }
 
+// MARK: - UserDefaults
 extension DataModel {
     static let userDefaultsKey = "DefaultKey"
     
