@@ -24,11 +24,17 @@ struct WeatherManager {
         performRequest(with: urlString)
     }
     
+    func fetchWeather(id: Int) {
+        let urlString = "\(weatherURL)&id=\(id)&\(apiKeys)"
+        performRequest(with: urlString)
+    }
+    
     func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
         let urlString = "\(weatherURL)&lat=\(latitude)&lon=\(longitude)&\(apiKeys)"
         performRequest(with: urlString)
     }
     
+    // MARK: - URLSession
     func performRequest(with urlString: String) {
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
@@ -48,20 +54,21 @@ struct WeatherManager {
         }
     }
     
+    // MARK: - Parse JSON
     func parseJSON(_ weaterData: Data) -> WeatherModel? {
         let decoder = JSONDecoder()
         
         do {
             let decodeData = try decoder.decode(WeatherData.self, from: weaterData)
-            let id = decodeData.weather[0].id
+            let conditionId = decodeData.weather[0].id
+            let id = decodeData.id
             let temp = decodeData.main.temp
             let name = decodeData.name
-            let weather = WeatherModel(conditionId: id, cityName: name, temperature: temp)
+            let weather = WeatherModel(conditionId: conditionId, cityName: name, temperature: temp, id: id)
             return weather
         } catch {
             self.delegate?.didFailWithError(error: error)
             return nil
         }
     }
-    
 }
