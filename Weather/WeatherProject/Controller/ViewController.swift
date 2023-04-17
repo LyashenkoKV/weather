@@ -8,12 +8,12 @@
 import UIKit
 import CoreLocation
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
     @IBOutlet weak var weatherImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
-    @IBOutlet weak var myTableView: UITableView!
+    @IBOutlet weak var myCollectionView: UICollectionView!
     
     var weatherManager = WeatherManager()
     var locationManager = CLLocationManager()
@@ -29,18 +29,24 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        myTableView.delegate = self
-        myTableView.dataSource = self
+        myCollectionView.delegate = self
+        myCollectionView.dataSource = self
         
-        let nib = UINib(nibName: "WeatherTableViewCell", bundle: nil)
-        myTableView.register(nib, forCellReuseIdentifier: "xibCellId")
+        let nib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
+        myCollectionView.register(nib, forCellWithReuseIdentifier: "Cell")
         
         refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
-        myTableView.addSubview(refreshControl)
+        myCollectionView.addSubview(refreshControl)
         view.addVerticalGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
+        
+        myCollectionView.dragInteractionEnabled = true
+        myCollectionView.dropDelegate = self
         
         searchTextField.delegate = self
         weatherManager.delegate = self
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
+        myCollectionView.addGestureRecognizer(longPressGesture)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -61,37 +67,73 @@ class ViewController: UIViewController {
         guard let id = id else { return }
         let addData = DataModel(name: cityNameLabel.text ?? "", id: id)
         self.data.append(addData)
-        myTableView.reloadData()
+        myCollectionView.reloadData()
     }
     
     // Function for handling pull-to-refresh event
     @objc private func refreshTable() {
-        myTableView.reloadData()
+        myCollectionView.reloadData()
         refreshControl.endRefreshing()
     }
-}
-
-// MARK: - UITableViewDataSource, UITableViewDelegate
-extension ViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return data.count
-    }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "xibCellId", for: indexPath) as! WeatherTableViewCell
-        //cell.isUserInteractionEnabled = false
-        cell.configure(data[indexPath.row])
-        return cell
-    }
-    
-    // delete rows
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            data.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
+    // Function for update cell position
+    @objc private func handleLongPressGesture(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .began:
+            guard let selectedIndexPath = myCollectionView.indexPathForItem(at: gestureRecognizer.location(in: myCollectionView)) else { return }
+            myCollectionView.beginInteractiveMovementForItem(at: selectedIndexPath)
+        case .changed:
+            myCollectionView.updateInteractiveMovementTargetPosition(gestureRecognizer.location(in: myCollectionView))
+        case .ended:
+            myCollectionView.endInteractiveMovement()
+            DataModel.save(data)
+        default:
+            myCollectionView.cancelInteractiveMovement()
         }
     }
 }
+
+// MARK: - UICollectionViewDelegate, WeatherCollectionViewCellDelegate
+extension ViewController: UICollectionViewDelegate, WeatherCollectionViewCellDelegate {
+    func collectionView(_ collectionView: UICollectionView, canEditItemAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func deleteCell(_ cell: WeatherCollectionViewCell) {
+        guard let indexPath = myCollectionView.indexPath(for: cell) else { return }
+        self.data.remove(at: indexPath.row)
+        DataModel.save(self.data)
+        self.myCollectionView.reloadData()
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension ViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return data.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! WeatherCollectionViewCell
+        cell.configure(data[indexPath.row])
+        cell.delegate = self
+        cell.layer.cornerRadius = 20
+        cell.layer.borderWidth = 1
+        return cell
+    }
+}
+
+// MARK: - UICollectionViewDropDelegate
+extension ViewController: UICollectionViewDropDelegate {
+    func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let item = data.remove(at: sourceIndexPath.item)
+           data.insert(item, at: destinationIndexPath.item)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+    }
+}
+
 
 // MARK: - UITextFieldDelegate
 extension ViewController: UITextFieldDelegate {

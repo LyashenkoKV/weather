@@ -7,15 +7,29 @@
 
 import Foundation
 
-struct WeatherModel {
+@objcMembers
+final class WeatherModel: NSObject {
     let conditionId: Int
     let cityName: String
     let temperature: Double
     let id: Int
+    let timezone: Int
     
     var temperatureString: String {
         return String(format: "%.1f", temperature)
     }
+    
+    var timeZoneString: String {
+        TimeManager.shared.timeZoneString(timeZone: timezone)
+    }
+    
+    init(conditionId: Int, cityName: String, temperature: Double, id: Int, timezone: Int) {
+            self.conditionId = conditionId
+            self.cityName = cityName
+            self.temperature = temperature
+            self.id = id
+            self.timezone = timezone
+        }
     
     var conditionName: String {
         switch conditionId {
