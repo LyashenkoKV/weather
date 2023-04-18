@@ -12,7 +12,7 @@ final class ViewController: UIViewController {
     @IBOutlet weak var weatherImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityNameLabel: UILabel!
-    @IBOutlet weak var searchTextField: UITextField!
+    @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var myCollectionView: UICollectionView!
     @IBOutlet weak var cityTableView: UITableView!
     
@@ -20,6 +20,7 @@ final class ViewController: UIViewController {
     var locationManager = CLLocationManager()
     var id: Int?
     let refreshControl = UIRefreshControl()
+    var results: [City] = []
     
     private var data: [DataModel] = DataModel.loadData() {
         didSet {
@@ -33,8 +34,16 @@ final class ViewController: UIViewController {
         myCollectionView.delegate = self
         myCollectionView.dataSource = self
         
-        let nib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
-        myCollectionView.register(nib, forCellWithReuseIdentifier: "Cell")
+        cityTableView.delegate = self
+        cityTableView.dataSource = self
+        cityTableView.isHidden = true
+        cityTableView.separatorStyle = .none
+        cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
+        
+        let collectionNib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
+        myCollectionView.register(collectionNib, forCellWithReuseIdentifier: "Cell")
+        let tableNib = UINib(nibName: "CityTableViewCell", bundle: nil)
+        cityTableView.register(tableNib, forCellReuseIdentifier: "CityCell")
         
         refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
         myCollectionView.addSubview(refreshControl)
@@ -43,7 +52,9 @@ final class ViewController: UIViewController {
         myCollectionView.dragInteractionEnabled = true
         myCollectionView.dropDelegate = self
         
-        searchTextField.delegate = self
+        searchBar.delegate = self
+        searchBar.backgroundImage = UIImage()
+        
         weatherManager.delegate = self
         
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
@@ -57,11 +68,6 @@ final class ViewController: UIViewController {
     
     @IBAction func currentLocationButton(_ sender: UIButton) {
         locationManager.requestLocation()
-    }
-    
-    @IBAction func searchButton(_ sender: UIButton) {
-        searchTextField.endEditing(true)
-        print(searchTextField.text!)
     }
     
     @IBAction func addDataButton(_ sender: UIButton) {
@@ -135,29 +141,39 @@ extension ViewController: UICollectionViewDropDelegate {
     }
 }
 
-
-// MARK: - UITextFieldDelegate
-extension ViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        searchTextField.endEditing(true)
-        searchTextField.text = ""
-        return true
-    }
+// MARK: - UISearchBarDelegate
+extension ViewController: UISearchBarDelegate {
     
-    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        if textField.text != "" {
-            return true
-        } else {
-            textField.placeholder = "Type something"
-            return false
-        }
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if let city = searchTextField.text {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let city = searchBar.text {
             weatherManager.fetchWeather(with: .byCityName(city))
         }
-        searchTextField.text = ""
+        searchBar.text = ""
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.endEditing(true)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            results = []
+            cityTableView.reloadData()
+            cityTableView.isHidden = true
+        } else {
+            NetworkManager.shared.fetchCities(for: searchText) { [weak self] result in
+                switch result {
+                case .success(let cities):
+                    DispatchQueue.main.async {
+                        self?.results = cities
+                        self?.cityTableView.reloadData()
+                        self?.cityTableView.isHidden = cities.isEmpty
+                    }
+                case .failure(let error):
+                    print("Error: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
 
@@ -194,5 +210,29 @@ extension ViewController: CLLocationManagerDelegate {
         locationManager.requestWhenInUseAuthorization()
         locationManager.delegate = self
         locationManager.requestLocation()
+    }
+}
+
+// MARK: - UITextViewDelegate, UITableViewDataSource
+extension ViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedCity = results[indexPath.row]
+        searchBar.text = "\(selectedCity.name), \(selectedCity.country)"
+        tableView.isHidden = true
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 40
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return results.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CityCell", for: indexPath) as! CityTableViewCell
+        let city = results[indexPath.row]
+        cell.cityCellLabel?.text = "\(city.name), \(city.country)"
+        return cell
     }
 }

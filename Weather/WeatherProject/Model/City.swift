@@ -6,3 +6,12 @@
 //
 
 import Foundation
+import CoreLocation
+
+struct City: Codable {
+    let name: String
+    let lat: Double
+    let lon: Double
+    let country: String
+    let state: String?
+}

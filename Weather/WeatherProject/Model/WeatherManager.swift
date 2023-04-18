@@ -25,7 +25,6 @@ struct WeatherManager {
     var delegate: WeatherManagerDelegate?
     
     func fetchWeather(with requestType: WeatherRequestType) {
-        
         var components = URLComponents(string: weatherURL)!
         var queryItems = [URLQueryItem]()
         
@@ -45,7 +44,6 @@ struct WeatherManager {
             queryItems.append(URLQueryItem(name: "units", value: "metric"))
             queryItems.append(URLQueryItem(name: "appid", value: apiKey))
             components.queryItems = queryItems
-            print(components.url!.absoluteString)
             performRequest(with: components.url!.absoluteString)
         }
     }
