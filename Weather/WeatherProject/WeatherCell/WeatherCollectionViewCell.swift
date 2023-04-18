@@ -31,7 +31,7 @@ final class WeatherCollectionViewCell: UICollectionViewCell {
         cityNameLabel.text = city
         weatherManager = WeatherManager()
         weatherManager?.delegate = self
-        weatherManager?.fetchWeather(id: id)
+        weatherManager?.fetchWeather(with: .byCityID(id))
     }
     
     @IBAction func deleteCellButtonAction(_ sender: UIButton) {

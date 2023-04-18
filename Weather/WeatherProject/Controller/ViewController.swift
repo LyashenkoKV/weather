@@ -14,6 +14,7 @@ final class ViewController: UIViewController {
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
     @IBOutlet weak var myCollectionView: UICollectionView!
+    @IBOutlet weak var cityTableView: UITableView!
     
     var weatherManager = WeatherManager()
     var locationManager = CLLocationManager()
@@ -154,7 +155,7 @@ extension ViewController: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if let city = searchTextField.text {
-            weatherManager.fetchWeather(cityName: city)
+            weatherManager.fetchWeather(with: .byCityName(city))
         }
         searchTextField.text = ""
     }
@@ -181,7 +182,7 @@ extension ViewController: CLLocationManagerDelegate {
             locationManager.stopUpdatingLocation()
             let lat = location.coordinate.latitude
             let lon = location.coordinate.longitude
-            weatherManager.fetchWeather(latitude: lat, longitude: lon)
+            weatherManager.fetchWeather(with: .byCoordinates(lat, lon))
         }
     }
     
