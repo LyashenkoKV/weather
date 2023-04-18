@@ -21,28 +21,33 @@ enum WeatherRequestType {
 
 struct WeatherManager {
     let weatherURL = "https://api.openweathermap.org/data/2.5/weather?"
-    let apiKeys = "be25602c7b7109335d318474b9076526"
     
     var delegate: WeatherManagerDelegate?
     
     func fetchWeather(with requestType: WeatherRequestType) {
+        
         var components = URLComponents(string: weatherURL)!
         var queryItems = [URLQueryItem]()
         
-        switch requestType {
-        case .byCityName(let cityName):
-            queryItems.append(URLQueryItem(name: "q", value: cityName))
-        case .byCityID(let cityID):
-            queryItems.append(URLQueryItem(name: "id", value: "\(cityID)"))
-        case .byCoordinates(let latitude, let longitude):
-            queryItems.append(URLQueryItem(name: "lat", value: "\(latitude)"))
-            queryItems.append(URLQueryItem(name: "lon", value: "\(longitude)"))
+        if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+               let config = NSDictionary(contentsOfFile: path),
+           let apiKey = config["apiKey"] as? String {
+
+            switch requestType {
+            case .byCityName(let cityName):
+                queryItems.append(URLQueryItem(name: "q", value: cityName))
+            case .byCityID(let cityID):
+                queryItems.append(URLQueryItem(name: "id", value: "\(cityID)"))
+            case .byCoordinates(let latitude, let longitude):
+                queryItems.append(URLQueryItem(name: "lat", value: "\(latitude)"))
+                queryItems.append(URLQueryItem(name: "lon", value: "\(longitude)"))
+            }
+            queryItems.append(URLQueryItem(name: "units", value: "metric"))
+            queryItems.append(URLQueryItem(name: "appid", value: apiKey))
+            components.queryItems = queryItems
+            print(components.url!.absoluteString)
+            performRequest(with: components.url!.absoluteString)
         }
-        queryItems.append(URLQueryItem(name: "units", value: "metric"))
-        queryItems.append(URLQueryItem(name: "appid", value: apiKeys))
-        components.queryItems = queryItems
-        print(components.url!.absoluteString)
-        performRequest(with: components.url!.absoluteString)
     }
     
     // MARK: - URLSession
