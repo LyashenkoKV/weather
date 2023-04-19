@@ -16,11 +16,12 @@ final class ViewController: UIViewController {
     @IBOutlet weak var myCollectionView: UICollectionView!
     @IBOutlet weak var cityTableView: UITableView!
     
-    var weatherManager = WeatherManager()
-    var locationManager = CLLocationManager()
-    var id: Int?
-    let refreshControl = UIRefreshControl()
-    var results: [City] = []
+    private var weatherManager = WeatherManager()
+    private var locationManager = CLLocationManager()
+    private var id: Int?
+    private let refreshControl = UIRefreshControl()
+    private var results: [City] = []
+    private var selectedIndexPath: IndexPath?
     
     private var data: [DataModel] = DataModel.loadData() {
         didSet {
@@ -33,6 +34,7 @@ final class ViewController: UIViewController {
         
         tableViewSettings()
         collectionViewSettings()
+        flowLayout()
         
         refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
         view.addVerticalGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
@@ -81,6 +83,16 @@ final class ViewController: UIViewController {
         myCollectionView.dataSource = self
     }
     
+    fileprivate func flowLayout() {
+        let width = UIScreen.main.bounds.width
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: width - 30, height: 85)
+        layout.sectionInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+        layout.minimumLineSpacing = 10
+        layout.minimumInteritemSpacing = 10
+        myCollectionView.collectionViewLayout = layout
+    }
+    
     // Function for handling pull-to-refresh event
     @objc private func refreshTable() {
         myCollectionView.reloadData()
@@ -104,17 +116,23 @@ final class ViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDelegate, WeatherCollectionViewCellDelegate
-extension ViewController: UICollectionViewDelegate, WeatherCollectionViewCellDelegate {
+// MARK: - UICollectionViewDelegate
+extension ViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, canEditItemAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func deleteCell(_ cell: WeatherCollectionViewCell) {
-        guard let indexPath = myCollectionView.indexPath(for: cell) else { return }
-        self.data.remove(at: indexPath.row)
-        DataModel.save(self.data)
-        self.myCollectionView.reloadData()
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? WeatherCollectionViewCell {
+            cell.deleteCellButton.isHidden = false
+            
+            if let selectedIndexPath = self.selectedIndexPath,
+                selectedIndexPath != indexPath,
+                let selectedCell = collectionView.cellForItem(at: selectedIndexPath) as? WeatherCollectionViewCell {
+                selectedCell.deleteCellButton.isHidden = true
+            }
+            self.selectedIndexPath = indexPath
+        }
     }
 }
 
@@ -131,6 +149,16 @@ extension ViewController: UICollectionViewDataSource {
         cell.layer.cornerRadius = 20
         cell.layer.borderWidth = 1
         return cell
+    }
+}
+
+// MARK: - WeatherCollectionViewCellDelegate
+extension ViewController: WeatherCollectionViewCellDelegate {
+    func deleteCell(_ cell: WeatherCollectionViewCell) {
+        guard let indexPath = myCollectionView.indexPath(for: cell) else { return }
+        self.data.remove(at: indexPath.row)
+        DataModel.save(self.data)
+        self.myCollectionView.reloadData()
     }
 }
 
@@ -241,3 +269,5 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 }
+
+

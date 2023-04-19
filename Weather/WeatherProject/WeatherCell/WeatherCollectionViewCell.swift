@@ -23,6 +23,11 @@ final class WeatherCollectionViewCell: UICollectionViewCell {
     
     var delegate: WeatherCollectionViewCellDelegate?
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        deleteCellButton.isHidden = true
+    }
+    
     func configure(_ data: DataModel) {
         self.data = data
         let city = data.name
