@@ -19,10 +19,6 @@ final class WeatherModel: NSObject {
         return String(format: "%.1f", temperature)
     }
     
-    var timeZoneString: String {
-        TimeManager.shared.timeZoneString(timeZone: timezone)
-    }
-    
     init(conditionId: Int, cityName: String, temperature: Double, id: Int, timezone: Int) {
             self.conditionId = conditionId
             self.cityName = cityName

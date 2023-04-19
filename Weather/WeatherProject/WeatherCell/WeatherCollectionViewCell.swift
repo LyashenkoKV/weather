@@ -20,7 +20,6 @@ final class WeatherCollectionViewCell: UICollectionViewCell {
     
     private var data: DataModel?
     private var weatherManager: WeatherManager?
-    private var timer: Timer?
     
     var delegate: WeatherCollectionViewCellDelegate?
     
@@ -42,16 +41,10 @@ final class WeatherCollectionViewCell: UICollectionViewCell {
 // MARK: - WeatherManagerDelegate
 extension WeatherCollectionViewCell: WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
-        timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
-            self.timeLabel.text = weather.timeZoneString
-        }
-        
         DispatchQueue.main.async {
             self.tempLabel.text = weather.temperatureString
             self.weatherImage.image = UIImage(systemName: weather.conditionName)
-            self.timeLabel.text = weather.timeZoneString
-
-            RunLoop.current.add(self.timer!, forMode: .common)
+            TimeManager.shared.startUpdatingTime(forLabel: self.timeLabel, timeZoneOffset: weather.timezone)
         }
     }
     
@@ -61,8 +54,7 @@ extension WeatherCollectionViewCell: WeatherManagerDelegate {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        timer?.invalidate()
-        timer = nil
+        TimeManager.shared.stopUpdatingTime(forLabel: self.timeLabel)
     }
 }
 

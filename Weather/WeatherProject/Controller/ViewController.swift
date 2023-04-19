@@ -31,34 +31,16 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        myCollectionView.delegate = self
-        myCollectionView.dataSource = self
-        
-        cityTableView.delegate = self
-        cityTableView.dataSource = self
-        cityTableView.isHidden = true
-        cityTableView.separatorStyle = .none
-        cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
-        
-        let collectionNib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
-        myCollectionView.register(collectionNib, forCellWithReuseIdentifier: "Cell")
-        let tableNib = UINib(nibName: "CityTableViewCell", bundle: nil)
-        cityTableView.register(tableNib, forCellReuseIdentifier: "CityCell")
+        tableViewSettings()
+        collectionViewSettings()
         
         refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
-        myCollectionView.addSubview(refreshControl)
         view.addVerticalGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
-        
-        myCollectionView.dragInteractionEnabled = true
-        myCollectionView.dropDelegate = self
         
         searchBar.delegate = self
         searchBar.backgroundImage = UIImage()
         
         weatherManager.delegate = self
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
-        myCollectionView.addGestureRecognizer(longPressGesture)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -75,6 +57,28 @@ final class ViewController: UIViewController {
         let addData = DataModel(name: cityNameLabel.text ?? "", id: id)
         self.data.append(addData)
         myCollectionView.reloadData()
+    }
+    
+    fileprivate func tableViewSettings() {
+        let tableNib = UINib(nibName: "CityTableViewCell", bundle: nil)
+        cityTableView.register(tableNib, forCellReuseIdentifier: "CityCell")
+        cityTableView.delegate = self
+        cityTableView.dataSource = self
+        cityTableView.isHidden = true
+        cityTableView.separatorStyle = .none
+        cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
+    }
+    
+    fileprivate func collectionViewSettings() {
+        let collectionNib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
+        myCollectionView.register(collectionNib, forCellWithReuseIdentifier: "Cell")
+        myCollectionView.addSubview(refreshControl)
+        myCollectionView.dragInteractionEnabled = true
+        myCollectionView.dropDelegate = self
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
+        myCollectionView.addGestureRecognizer(longPressGesture)
+        myCollectionView.delegate = self
+        myCollectionView.dataSource = self
     }
     
     // Function for handling pull-to-refresh event
@@ -149,6 +153,7 @@ extension ViewController: UISearchBarDelegate {
             weatherManager.fetchWeather(with: .byCityName(city))
         }
         searchBar.text = ""
+        cityTableView.isHidden = true
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -213,7 +218,7 @@ extension ViewController: CLLocationManagerDelegate {
     }
 }
 
-// MARK: - UITextViewDelegate, UITableViewDataSource
+// MARK: - UITableViewDelegate, UITableViewDataSource
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCity = results[indexPath.row]
