@@ -7,12 +7,12 @@
 
 import Foundation
 import CoreLocation
-
+// MARK: - Protocol
 protocol WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel)
     func didFailWithError(error: Error)
 }
-
+// MARK: - Enum WeatherRequestType
 enum WeatherRequestType {
     case byCityName(String)
     case byCityID(Int)

@@ -69,6 +69,7 @@ final class ViewController: UIViewController {
         cityTableView.isHidden = true
         cityTableView.separatorStyle = .none
         cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
+    
     }
     
     fileprivate func collectionViewSettings() {
@@ -91,6 +92,23 @@ final class ViewController: UIViewController {
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 10
         myCollectionView.collectionViewLayout = layout
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        guard let touch = touches.first else { return }
+        let point = touch.location(in: view)
+        
+        if !cityTableView.isHidden {
+            cityTableView.isHidden = true
+        }
+        
+        if let selectedIndexPath = self.selectedIndexPath,
+           let cell = myCollectionView.cellForItem(at: selectedIndexPath) as? WeatherCollectionViewCell,
+           !cell.frame.contains(point) {
+            cell.deleteCellButton.isHidden = true
+            self.selectedIndexPath = nil
+        }
     }
     
     // Function for handling pull-to-refresh event
@@ -126,6 +144,10 @@ extension ViewController: UICollectionViewDelegate {
         if let cell = collectionView.cellForItem(at: indexPath) as? WeatherCollectionViewCell {
             cell.deleteCellButton.isHidden = false
             
+            if !cityTableView.isHidden {
+                cityTableView.isHidden = true
+            }
+
             if let selectedIndexPath = self.selectedIndexPath,
                 selectedIndexPath != indexPath,
                 let selectedCell = collectionView.cellForItem(at: selectedIndexPath) as? WeatherCollectionViewCell {
@@ -148,6 +170,7 @@ extension ViewController: UICollectionViewDataSource {
         cell.delegate = self
         cell.layer.cornerRadius = 20
         cell.layer.borderWidth = 1
+        
         return cell
     }
 }
@@ -159,6 +182,7 @@ extension ViewController: WeatherCollectionViewCellDelegate {
         self.data.remove(at: indexPath.row)
         DataModel.save(self.data)
         self.myCollectionView.reloadData()
+        cell.deleteCellButton.isHidden = true
     }
 }
 

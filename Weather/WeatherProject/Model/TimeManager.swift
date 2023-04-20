@@ -37,7 +37,7 @@ final class TimeManager {
             displayLink = nil
         }
     }
-    
+    // MARK: - Selector
     @objc private func updateTime(_ displayLink: CADisplayLink) {
         // updating the time for each label from the labelsToUpdate dictionary
         let currentDate = Date()

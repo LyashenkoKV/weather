@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+// MARK: - Protocol
 protocol WeatherCollectionViewCellDelegate: AnyObject {
     func deleteCell(_ cell: WeatherCollectionViewCell)
 }

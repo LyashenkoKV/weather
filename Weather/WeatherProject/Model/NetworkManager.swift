@@ -9,10 +9,7 @@ import Foundation
 
 final class NetworkManager {
     static let shared = NetworkManager()
-    
     private let session = URLSession.shared
-    
-    private init() {}
     
     func fetchCities(for query: String, completion: @escaping (Result<[City], Error>) -> Void) {
         let endpoint = "https://api.openweathermap.org/geo/1.0/direct"
