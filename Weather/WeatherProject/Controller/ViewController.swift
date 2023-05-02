@@ -9,12 +9,8 @@ import UIKit
 import CoreLocation
 
 final class ViewController: UIViewController {
-    @IBOutlet weak var weatherImageView: UIImageView!
-    @IBOutlet weak var temperatureLabel: UILabel!
-    @IBOutlet weak var cityNameLabel: UILabel!
-    @IBOutlet weak var searchBar: UISearchBar!
-    @IBOutlet weak var myCollectionView: UICollectionView!
-    @IBOutlet weak var cityTableView: UITableView!
+    
+    var uiElement = MyViewControllerUI()
     
     private var weatherManager = WeatherManager()
     private var locationManager = CLLocationManager()
@@ -22,6 +18,10 @@ final class ViewController: UIViewController {
     private let refreshControl = UIRefreshControl()
     private var results: [City] = []
     private var selectedIndexPath: IndexPath?
+    private var collectionView: UICollectionView!
+    private var searchBar: UISearchBar!
+    private var cityTableView: UITableView!
+    private let color = UIColor(red: 27/255, green: 67/255, blue: 72/255, alpha: 1)
     
     private var data: [DataModel] = DataModel.loadData() {
         didSet {
@@ -32,12 +32,26 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        uiElement.setupUI(for: self)
+        
+        if traitCollection.verticalSizeClass == .regular {
+            NSLayoutConstraint.activate(uiElement.portraitConstraints)
+        } else {
+            NSLayoutConstraint.activate(uiElement.landscapeLeftConstraints)
+        }
+        
+        searchBar = uiElement.searchBar
+        collectionView = uiElement.collectionView
+        cityTableView = uiElement.cityTableView
+        
         tableViewSettings()
         collectionViewSettings()
-        flowLayout()
         
         refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
-        view.addVerticalGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
+        view.addGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
+        
+        uiElement.currentLocationButton.addTarget(self, action: #selector(currentLocationButton), for: .touchUpInside)
+        uiElement.addButton.addTarget(self, action: #selector(addDataButton), for: .touchUpInside)
         
         searchBar.delegate = self
         searchBar.backgroundImage = UIImage()
@@ -50,15 +64,45 @@ final class ViewController: UIViewController {
         setupLocation()
     }
     
-    @IBAction func currentLocationButton(_ sender: UIButton) {
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate { [weak self] _ in
+            guard let self = self else { return }
+            updateConstraintsForOrientation(size: size)
+            self.view.addGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
+        }
+    }
+    
+    func updateConstraintsForOrientation(size: CGSize) {
+        
+        switch UIDevice.current.orientation {
+        case .portrait:
+            NSLayoutConstraint.activate(uiElement.portraitConstraints)
+            NSLayoutConstraint.deactivate([uiElement.landscapeLeftConstraints, uiElement.landscapeRightConstraints, uiElement.portraitUpsideDownConstraints].flatMap { $0 })
+        case .portraitUpsideDown:
+            NSLayoutConstraint.activate(uiElement.portraitUpsideDownConstraints)
+            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.landscapeLeftConstraints, uiElement.landscapeRightConstraints].flatMap { $0 })
+        case .landscapeLeft:
+            NSLayoutConstraint.activate(uiElement.landscapeLeftConstraints)
+            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.portraitUpsideDownConstraints, uiElement.landscapeRightConstraints].flatMap { $0 })
+        case .landscapeRight:
+            NSLayoutConstraint.activate(uiElement.landscapeRightConstraints)
+            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.portraitUpsideDownConstraints, uiElement.landscapeLeftConstraints].flatMap { $0 })
+        default:
+            break
+        }
+    }
+    
+    @objc func currentLocationButton() {
         locationManager.requestLocation()
     }
     
-    @IBAction func addDataButton(_ sender: UIButton) {
+    @objc func addDataButton() {
         guard let id = id else { return }
-        let addData = DataModel(name: cityNameLabel.text ?? "", id: id)
+        let addData = DataModel(name: uiElement.cityNameLabel.text ?? "", id: id)
         self.data.append(addData)
-        myCollectionView.reloadData()
+        collectionView.reloadData()
     }
     
     fileprivate func tableViewSettings() {
@@ -69,29 +113,17 @@ final class ViewController: UIViewController {
         cityTableView.isHidden = true
         cityTableView.separatorStyle = .none
         cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
-    
     }
     
     fileprivate func collectionViewSettings() {
-        let collectionNib = UINib(nibName: "WeatherCollectionViewCell", bundle: nil)
-        myCollectionView.register(collectionNib, forCellWithReuseIdentifier: "Cell")
-        myCollectionView.addSubview(refreshControl)
-        myCollectionView.dragInteractionEnabled = true
-        myCollectionView.dropDelegate = self
+        collectionView.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        collectionView.addSubview(refreshControl)
+        collectionView.dragInteractionEnabled = true
+        collectionView.dropDelegate = self
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
-        myCollectionView.addGestureRecognizer(longPressGesture)
-        myCollectionView.delegate = self
-        myCollectionView.dataSource = self
-    }
-    
-    fileprivate func flowLayout() {
-        let width = UIScreen.main.bounds.width
-        let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: width - 30, height: 85)
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
-        layout.minimumLineSpacing = 10
-        layout.minimumInteritemSpacing = 10
-        myCollectionView.collectionViewLayout = layout
+        collectionView.addGestureRecognizer(longPressGesture)
+        collectionView.delegate = self
+        collectionView.dataSource = self
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -104,7 +136,7 @@ final class ViewController: UIViewController {
         }
         
         if let selectedIndexPath = self.selectedIndexPath,
-           let cell = myCollectionView.cellForItem(at: selectedIndexPath) as? WeatherCollectionViewCell,
+           let cell = collectionView.cellForItem(at: selectedIndexPath) as? WeatherCollectionViewCell,
            !cell.frame.contains(point) {
             cell.deleteCellButton.isHidden = true
             self.selectedIndexPath = nil
@@ -113,7 +145,7 @@ final class ViewController: UIViewController {
     
     // Function for handling pull-to-refresh event
     @objc private func refreshTable() {
-        myCollectionView.reloadData()
+        collectionView.reloadData()
         refreshControl.endRefreshing()
     }
     
@@ -121,15 +153,15 @@ final class ViewController: UIViewController {
     @objc private func handleLongPressGesture(_ gestureRecognizer: UILongPressGestureRecognizer) {
         switch gestureRecognizer.state {
         case .began:
-            guard let selectedIndexPath = myCollectionView.indexPathForItem(at: gestureRecognizer.location(in: myCollectionView)) else { return }
-            myCollectionView.beginInteractiveMovementForItem(at: selectedIndexPath)
+            guard let selectedIndexPath = collectionView.indexPathForItem(at: gestureRecognizer.location(in: collectionView)) else { return }
+            collectionView.beginInteractiveMovementForItem(at: selectedIndexPath)
         case .changed:
-            myCollectionView.updateInteractiveMovementTargetPosition(gestureRecognizer.location(in: myCollectionView))
+            collectionView.updateInteractiveMovementTargetPosition(gestureRecognizer.location(in: collectionView))
         case .ended:
-            myCollectionView.endInteractiveMovement()
+            collectionView.endInteractiveMovement()
             DataModel.save(data)
         default:
-            myCollectionView.cancelInteractiveMovement()
+            collectionView.cancelInteractiveMovement()
         }
     }
 }
@@ -175,13 +207,34 @@ extension ViewController: UICollectionViewDataSource {
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
+extension ViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cellWidth = collectionView.bounds.width - 10
+        let cellHeight = CGFloat(80)
+        
+        let maxWidth = collectionView.bounds.width
+        let maxHeight = collectionView.bounds.height
+        
+        return CGSize(width: min(cellWidth, maxWidth), height: min(cellHeight, maxHeight))
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+}
+
 // MARK: - WeatherCollectionViewCellDelegate
 extension ViewController: WeatherCollectionViewCellDelegate {
     func deleteCell(_ cell: WeatherCollectionViewCell) {
-        guard let indexPath = myCollectionView.indexPath(for: cell) else { return }
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
         self.data.remove(at: indexPath.row)
         DataModel.save(self.data)
-        self.myCollectionView.reloadData()
+        self.collectionView.reloadData()
         cell.deleteCellButton.isHidden = true
     }
 }
@@ -238,9 +291,9 @@ extension ViewController: UISearchBarDelegate {
 extension ViewController: WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
         id = weather.id
-        temperatureLabel.text = weather.temperatureString
-        weatherImageView.image = UIImage(systemName: weather.conditionName)
-        cityNameLabel.text = weather.cityName
+        uiElement.degreeLabel.text = weather.temperatureString
+        uiElement.imageView.image = UIImage(systemName: weather.conditionName)
+        uiElement.cityNameLabel.text = weather.cityName
     }
     
     func didFailWithError(error: Error) {
@@ -274,7 +327,7 @@ extension ViewController: CLLocationManagerDelegate {
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCity = results[indexPath.row]
-        searchBar.text = "\(selectedCity.name), \(selectedCity.country)"
+        uiElement.searchBar.text = "\(selectedCity.name), \(selectedCity.country)"
         tableView.isHidden = true
     }
     
@@ -293,5 +346,3 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 }
-
-
