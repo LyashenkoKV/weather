@@ -10,87 +10,77 @@ import CoreLocation
 
 final class ViewController: UIViewController {
     
-    var uiElement = MyViewControllerUI()
-    
+    private var myView = MyView()
     private var weatherManager = WeatherManager()
+    
     private var locationManager = CLLocationManager()
     private var id: Int?
     private let refreshControl = UIRefreshControl()
-    private var results: [City] = []
+    private var results: [CityModel] = []
     private var selectedIndexPath: IndexPath?
-    private var collectionView: UICollectionView!
-    private var searchBar: UISearchBar!
-    private var cityTableView: UITableView!
-    private let color = UIColor(red: 27/255, green: 67/255, blue: 72/255, alpha: 1)
-    
+
     private var data: [DataModel] = DataModel.loadData() {
         didSet {
             DataModel.save(data)
         }
     }
     
+    private lazy var searchBar: UISearchBar = {
+        return myView.searchBar
+    }()
+    
+    private lazy var collectionView: UICollectionView = {
+        return myView.collectionView
+    }()
+    
+    private lazy var cityTableView: UITableView = {
+        return myView.cityTableView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        uiElement.setupUI(for: self)
-        
-        if traitCollection.verticalSizeClass == .regular {
-            NSLayoutConstraint.activate(uiElement.portraitConstraints)
-        } else {
-            NSLayoutConstraint.activate(uiElement.landscapeLeftConstraints)
-        }
-        
-        searchBar = uiElement.searchBar
-        collectionView = uiElement.collectionView
-        cityTableView = uiElement.cityTableView
+        setupLocation()
+
+        myView.setupUI(for: self)
         
         tableViewSettings()
         collectionViewSettings()
         
-        refreshControl.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(refreshCollectionView), for: .valueChanged)
         view.addGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
         
-        uiElement.currentLocationButton.addTarget(self, action: #selector(currentLocationButton), for: .touchUpInside)
-        uiElement.addButton.addTarget(self, action: #selector(addDataButton), for: .touchUpInside)
+        myView.currentLocationButton.addTarget(self, action: #selector(currentLocationButton), for: .touchUpInside)
+        myView.addButton.addTarget(self, action: #selector(addDataButton), for: .touchUpInside)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewBottomAnchor(parameter:)),
+                                               name: UIResponder.keyboardDidShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewBottomAnchor(parameter:)),
+                                               name: UIResponder.keyboardWillHideNotification, object: nil)
         
         searchBar.delegate = self
-        searchBar.backgroundImage = UIImage()
-        
         weatherManager.delegate = self
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        setupLocation()
+    override func viewWillLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        myView.updateConstraintsForOrientation()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.view.layer.sublayers?.first(where: { $0.name == "GradientLayer" })?.frame = self.view.bounds
+        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        
+
         coordinator.animate { [weak self] _ in
             guard let self = self else { return }
-            updateConstraintsForOrientation(size: size)
-            self.view.addGradientLayer(topColor: primaryColor, bottomColor: secondaryColor)
-        }
-    }
-    
-    func updateConstraintsForOrientation(size: CGSize) {
-        
-        switch UIDevice.current.orientation {
-        case .portrait:
-            NSLayoutConstraint.activate(uiElement.portraitConstraints)
-            NSLayoutConstraint.deactivate([uiElement.landscapeLeftConstraints, uiElement.landscapeRightConstraints, uiElement.portraitUpsideDownConstraints].flatMap { $0 })
-        case .portraitUpsideDown:
-            NSLayoutConstraint.activate(uiElement.portraitUpsideDownConstraints)
-            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.landscapeLeftConstraints, uiElement.landscapeRightConstraints].flatMap { $0 })
-        case .landscapeLeft:
-            NSLayoutConstraint.activate(uiElement.landscapeLeftConstraints)
-            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.portraitUpsideDownConstraints, uiElement.landscapeRightConstraints].flatMap { $0 })
-        case .landscapeRight:
-            NSLayoutConstraint.activate(uiElement.landscapeRightConstraints)
-            NSLayoutConstraint.deactivate([uiElement.portraitConstraints, uiElement.portraitUpsideDownConstraints, uiElement.landscapeLeftConstraints].flatMap { $0 })
-        default:
-            break
+            
+            DispatchQueue.main.async {
+                self.collectionView.collectionViewLayout.invalidateLayout()
+                self.view.layoutIfNeeded()
+            }
         }
     }
     
@@ -100,21 +90,34 @@ final class ViewController: UIViewController {
     
     @objc func addDataButton() {
         guard let id = id else { return }
-        let addData = DataModel(name: uiElement.cityNameLabel.text ?? "", id: id)
+        let addData = DataModel(name: myView.cityNameLabel.text ?? "", id: id)
         self.data.append(addData)
         collectionView.reloadData()
     }
     
+    // MARK: - tableViewSettings
     fileprivate func tableViewSettings() {
-        let tableNib = UINib(nibName: "CityTableViewCell", bundle: nil)
-        cityTableView.register(tableNib, forCellReuseIdentifier: "CityCell")
+        cityTableView.register(CityTableViewCell.self, forCellReuseIdentifier: "CityCell")
         cityTableView.delegate = self
         cityTableView.dataSource = self
         cityTableView.isHidden = true
         cityTableView.separatorStyle = .none
-        cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
     }
     
+    @objc func updateTableViewBottomAnchor(parameter: Notification) {
+        let userInfo = parameter.userInfo
+        let getKeyboardRect = (userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let keyboardFrame = view.convert(getKeyboardRect, to: view.window)
+
+        if parameter.name == UIResponder.keyboardWillHideNotification {
+            cityTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
+        } else {
+            cityTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -keyboardFrame.height - 5).isActive = true
+        }
+        view.layoutIfNeeded()
+    }
+    
+    // MARK: - collectionViewSettings
     fileprivate func collectionViewSettings() {
         collectionView.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         collectionView.addSubview(refreshControl)
@@ -144,7 +147,7 @@ final class ViewController: UIViewController {
     }
     
     // Function for handling pull-to-refresh event
-    @objc private func refreshTable() {
+    @objc private func refreshCollectionView() {
         collectionView.reloadData()
         refreshControl.endRefreshing()
     }
@@ -190,6 +193,17 @@ extension ViewController: UICollectionViewDelegate {
     }
 }
 
+// MARK: - WeatherCollectionViewCellDelegate
+extension ViewController: WeatherCollectionViewCellDelegate {
+    func deleteCell(_ cell: CollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        self.data.remove(at: indexPath.row)
+        DataModel.save(self.data)
+        self.collectionView.reloadData()
+        cell.deleteCellButton.isHidden = true
+    }
+}
+
 // MARK: - UICollectionViewDataSource
 extension ViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -202,7 +216,6 @@ extension ViewController: UICollectionViewDataSource {
         cell.delegate = self
         cell.layer.cornerRadius = 20
         cell.layer.borderWidth = 1
-        
         return cell
     }
 }
@@ -217,25 +230,6 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         let maxHeight = collectionView.bounds.height
         
         return CGSize(width: min(cellWidth, maxWidth), height: min(cellHeight, maxHeight))
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 10
-    }
-}
-
-// MARK: - WeatherCollectionViewCellDelegate
-extension ViewController: WeatherCollectionViewCellDelegate {
-    func deleteCell(_ cell: WeatherCollectionViewCell) {
-        guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        self.data.remove(at: indexPath.row)
-        DataModel.save(self.data)
-        self.collectionView.reloadData()
-        cell.deleteCellButton.isHidden = true
     }
 }
 
@@ -291,9 +285,9 @@ extension ViewController: UISearchBarDelegate {
 extension ViewController: WeatherManagerDelegate {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
         id = weather.id
-        uiElement.degreeLabel.text = weather.temperatureString
-        uiElement.imageView.image = UIImage(systemName: weather.conditionName)
-        uiElement.cityNameLabel.text = weather.cityName
+        myView.degreeLabel.text = weather.temperatureString
+        myView.imageView.image = UIImage(systemName: weather.conditionName)
+        myView.cityNameLabel.text = weather.cityName
     }
     
     func didFailWithError(error: Error) {
@@ -325,9 +319,10 @@ extension ViewController: CLLocationManagerDelegate {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCity = results[indexPath.row]
-        uiElement.searchBar.text = "\(selectedCity.name), \(selectedCity.country)"
+        myView.searchBar.text = "\(selectedCity.name), \(selectedCity.country)"
         tableView.isHidden = true
     }
     
@@ -341,6 +336,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CityCell", for: indexPath) as! CityTableViewCell
+        cell.backgroundColor = .clear
         let city = results[indexPath.row]
         cell.cityCellLabel?.text = "\(city.name), \(city.country)"
         return cell

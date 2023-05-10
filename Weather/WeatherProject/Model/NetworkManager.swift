@@ -11,7 +11,7 @@ final class NetworkManager {
     static let shared = NetworkManager()
     private let session = URLSession.shared
     
-    func fetchCities(for query: String, completion: @escaping (Result<[City], Error>) -> Void) {
+    func fetchCities(for query: String, completion: @escaping (Result<[CityModel], Error>) -> Void) {
         let endpoint = "https://api.openweathermap.org/geo/1.0/direct"
 
         if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
@@ -44,9 +44,9 @@ final class NetworkManager {
         }
     }
     
-    private func parseJSON(data: Data) throws -> [City] {
+    private func parseJSON(data: Data) throws -> [CityModel] {
         let decoder = JSONDecoder()
-        let cities = try decoder.decode([City].self, from: data)
+        let cities = try decoder.decode([CityModel].self, from: data)
         return cities
     }
 }

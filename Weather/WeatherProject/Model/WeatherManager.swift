@@ -73,7 +73,7 @@ struct WeatherManager {
         let decoder = JSONDecoder()
         
         do {
-            let decodeData = try decoder.decode(WeatherData.self, from: weaterData)
+            let decodeData = try decoder.decode(WeatherDataModel.self, from: weaterData)
             let conditionId = decodeData.weather[0].id
             let id = decodeData.id
             let temp = decodeData.main.temp

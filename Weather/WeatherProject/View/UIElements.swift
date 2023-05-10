@@ -7,21 +7,11 @@
 
 import UIKit
 
-struct MyViewControllerUI {
-    
-    var allConstraints: [NSLayoutConstraint] {
-        return [
-            portraitConstraints,
-            portraitUpsideDownConstraints,
-            landscapeLeftConstraints,
-            landscapeRightConstraints
-        ].flatMap { $0 }
-    }
-    
-    var portraitConstraints: [NSLayoutConstraint] = []
-    var portraitUpsideDownConstraints: [NSLayoutConstraint] = []
-    var landscapeLeftConstraints: [NSLayoutConstraint] = []
-    var landscapeRightConstraints: [NSLayoutConstraint] = []
+final class MyView: UIView {
+    private var portraitConstraints: [NSLayoutConstraint] = []
+    private var portraitUpsideDownConstraints: [NSLayoutConstraint] = []
+    private var landscapeLeftConstraints: [NSLayoutConstraint] = []
+    private var landscapeRightConstraints: [NSLayoutConstraint] = []
     
     let generalStackView = UIStackView()
     let searchStackView = UIStackView()
@@ -34,12 +24,43 @@ struct MyViewControllerUI {
     let iconDegreeLabel = UILabel()
     let celsiusLabel = UILabel()
     let cityNameLabel = UILabel()
-    var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     let cityTableView = UITableView()
-    let color = UIColor(red: 27/255, green: 67/255, blue: 72/255, alpha: 1)
     
-    mutating func setupUI(for viewController: ViewController) {
-        
+    func setupUI(for viewController: UIViewController) {
+        addSubviews(to: viewController.view)
+        addConstraints(to: viewController.view)
+        addTableViewConstraints(to: viewController.view)
+        configureStackViews()
+        configureButtons()
+        configureLabels()
+        configureImageView()
+        configureSearchBar()
+        configureCollectionView()
+        configureTableView()
+        NSLayoutConstraint.activate(portraitConstraints)
+    }
+    
+    func updateConstraintsForOrientation() {
+        switch UIDevice.current.orientation {
+        case .portrait:
+            NSLayoutConstraint.activate(portraitConstraints)
+            NSLayoutConstraint.deactivate([landscapeLeftConstraints, landscapeRightConstraints, portraitUpsideDownConstraints].flatMap { $0 })
+        case .portraitUpsideDown:
+            NSLayoutConstraint.activate(portraitUpsideDownConstraints)
+            NSLayoutConstraint.deactivate([portraitConstraints, landscapeLeftConstraints, landscapeRightConstraints].flatMap { $0 })
+        case .landscapeLeft:
+            NSLayoutConstraint.activate(landscapeLeftConstraints)
+            NSLayoutConstraint.deactivate([portraitConstraints, portraitUpsideDownConstraints, landscapeRightConstraints].flatMap { $0 })
+        case .landscapeRight:
+            NSLayoutConstraint.activate(landscapeRightConstraints)
+            NSLayoutConstraint.deactivate([portraitConstraints, portraitUpsideDownConstraints, landscapeLeftConstraints].flatMap { $0 })
+        default:
+            break
+        }
+    }
+    
+    private func configureStackViews() {
         generalStackView.axis = .vertical
         generalStackView.alignment = .trailing
         generalStackView.distribution = .fill
@@ -49,43 +70,56 @@ struct MyViewControllerUI {
         searchStackView.alignment = .trailing
         searchStackView.spacing = 10
         
-        currentLocationButton.setImage(UIImage(systemName: "location"), for: .normal)
-        currentLocationButton.tintColor = color
-        
-        searchBar.placeholder = "Search"
-        searchBar.searchBarStyle = .minimal
-        
-        addButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        addButton.tintColor = color
-        cityTableView.layer.cornerRadius = 20
-        
-        imageView.image = UIImage(named: "image")
-        imageView.tintColor = color
-        imageView.contentMode = .scaleAspectFit
-        
         tempStackView.axis = .horizontal
         tempStackView.spacing = 10
         tempStackView.contentMode = .bottom
+    }
+    
+    private func configureButtons() {
+        currentLocationButton.setImage(UIImage(systemName: "location"), for: .normal)
+        currentLocationButton.tintColor = myTintColor
         
+        addButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        addButton.tintColor = myTintColor
+    }
+    
+    private func configureLabels() {
         degreeLabel.font = UIFont.boldSystemFont(ofSize: 80)
-        degreeLabel.textColor = color
-        degreeLabel.contentMode = .bottom
+        degreeLabel.textColor = myTintColor
         
         iconDegreeLabel.font = UIFont.systemFont(ofSize: 100, weight: .thin)
         iconDegreeLabel.text = "°"
-        iconDegreeLabel.textColor = color
-        iconDegreeLabel.contentMode = .bottom
+        iconDegreeLabel.textColor = myTintColor
         
         celsiusLabel.font = UIFont.systemFont(ofSize: 100, weight: .light)
         celsiusLabel.text = "C"
-        celsiusLabel.textColor = color
-        celsiusLabel.contentMode = .bottom
+        celsiusLabel.textColor = myTintColor
         
-        cityNameLabel.textColor = color
+        cityNameLabel.textColor = myTintColor
         cityNameLabel.font = UIFont.systemFont(ofSize: 30, weight: .light)
-        
+    }
+    
+    private func configureImageView() {
+        imageView.image = UIImage(named: "image")
+        imageView.tintColor = myTintColor
+        imageView.contentMode = .scaleAspectFit
+    }
+    
+    private func configureSearchBar() {
+        searchBar.placeholder = "Search"
+        searchBar.searchBarStyle = .minimal
+    }
+    
+    private func configureCollectionView() {
         collectionView.backgroundColor = .clear
-        
+    }
+    
+    private func configureTableView() {
+        cityTableView.layer.cornerRadius = 20
+        cityTableView.backgroundColor = UIColor(white: 0.5, alpha: 0.5)
+    }
+    
+    private func addSubviews(to view: UIView) {
         generalStackView.translatesAutoresizingMaskIntoConstraints = false
         imageView.translatesAutoresizingMaskIntoConstraints = false
         tempStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -93,9 +127,9 @@ struct MyViewControllerUI {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         cityTableView.translatesAutoresizingMaskIntoConstraints = false
         
-        viewController.view.addSubview(collectionView)
-        viewController.view.addSubview(cityTableView)
-        viewController.view.addSubview(generalStackView)
+        view.addSubview(generalStackView)
+        view.addSubview(collectionView)
+        view.addSubview(cityTableView)
         generalStackView.addArrangedSubview(searchStackView)
         generalStackView.addArrangedSubview(imageView)
         generalStackView.addArrangedSubview(tempStackView)
@@ -106,8 +140,22 @@ struct MyViewControllerUI {
         tempStackView.addArrangedSubview(degreeLabel)
         tempStackView.addArrangedSubview(iconDegreeLabel)
         tempStackView.addArrangedSubview(celsiusLabel)
+    }
 
+    private func addTableViewConstraints(to view: UIView) {
         
+        NSLayoutConstraint.activate([
+            cityTableView.topAnchor.constraint(equalTo: searchStackView.bottomAnchor, constant: 2),
+            cityTableView.leadingAnchor.constraint(equalTo: generalStackView.leadingAnchor, constant: 0),
+            cityTableView.trailingAnchor.constraint(equalTo: generalStackView.trailingAnchor, constant: 0),
+        ])
+
+//        let tableViewBottomConstraint = cityTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -keyboardFrame.height)
+//        tableViewBottomConstraint.priority = UILayoutPriority(999)
+//        tableViewBottomConstraint.isActive = true
+    }
+   
+    private func addConstraints(to view: UIView) {
         NSLayoutConstraint.activate([
             searchStackView.heightAnchor.constraint(equalToConstant: 40),
             searchStackView.centerXAnchor.constraint(equalTo: generalStackView.centerXAnchor),
@@ -128,9 +176,6 @@ struct MyViewControllerUI {
             addButton.trailingAnchor.constraint(equalTo: searchStackView.trailingAnchor, constant: 0),
             addButton.topAnchor.constraint(equalTo: searchStackView.topAnchor, constant: 0),
             
-            cityTableView.topAnchor.constraint(equalTo: searchStackView.bottomAnchor, constant: 2),
-            cityTableView.leadingAnchor.constraint(equalTo: generalStackView.leadingAnchor, constant: 0),
-            cityTableView.trailingAnchor.constraint(equalTo: generalStackView.trailingAnchor, constant: 0),
             
             imageView.heightAnchor.constraint(equalToConstant: 100),
             imageView.widthAnchor.constraint(equalToConstant: 100),
@@ -156,59 +201,51 @@ struct MyViewControllerUI {
         ])
         
         portraitConstraints = [
-            generalStackView.topAnchor.constraint(equalTo: viewController.view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            generalStackView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
-            generalStackView.trailingAnchor.constraint(equalTo: viewController.view.trailingAnchor, constant: -20),
+            generalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            generalStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            generalStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             generalStackView.heightAnchor.constraint(equalToConstant: 340),
             
             collectionView.topAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: 10),
-            collectionView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
-            collectionView.trailingAnchor.constraint(equalTo: viewController.view.trailingAnchor, constant: -20),
-            collectionView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor, constant: 0),
-            
-            cityTableView.bottomAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: 105)
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
         ]
-
+        
         landscapeLeftConstraints = [
-            generalStackView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
-            generalStackView.topAnchor.constraint(equalTo: viewController.view.topAnchor, constant: 20),
-            generalStackView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
-            generalStackView.trailingAnchor.constraint(equalTo: collectionView.leadingAnchor, constant: -8),
-                
-            collectionView.topAnchor.constraint(equalTo: viewController.view.topAnchor, constant: 10),
-            collectionView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: viewController.view.centerXAnchor, constant: -5),
-            collectionView.trailingAnchor.constraint(equalTo: viewController.view.trailingAnchor),
+            generalStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            generalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            generalStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            generalStackView.trailingAnchor.constraint(equalTo: collectionView.safeAreaLayoutGuide.leadingAnchor, constant: -5),
             
-            cityTableView.bottomAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: -10)
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: -5),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ]
 
         landscapeRightConstraints = [
-            generalStackView.leadingAnchor.constraint(equalTo: viewController.view.centerXAnchor, constant: -5),
-            generalStackView.topAnchor.constraint(equalTo: viewController.view.topAnchor, constant: 20),
-            generalStackView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
-            generalStackView.trailingAnchor.constraint(equalTo: viewController.view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-                
-            collectionView.topAnchor.constraint(equalTo: viewController.view.topAnchor, constant: 10),
-            collectionView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: generalStackView.leadingAnchor, constant: -5),
-            collectionView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
+            generalStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: -5),
+            generalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            generalStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            generalStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
             
-            cityTableView.bottomAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: -10)
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: generalStackView.safeAreaLayoutGuide.leadingAnchor, constant: -5),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
         ]
-
-
+        
         portraitUpsideDownConstraints = [
-            generalStackView.topAnchor.constraint(equalTo: viewController.view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            generalStackView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
-            generalStackView.trailingAnchor.constraint(equalTo: viewController.view.trailingAnchor, constant: -20),
+            generalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            generalStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            generalStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             generalStackView.heightAnchor.constraint(equalToConstant: 340),
-            collectionView.topAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: 10),
-            collectionView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor, constant: 20),
-            collectionView.trailingAnchor.constraint(equalTo: viewController.view.trailingAnchor, constant: -20),
-            collectionView.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor, constant: 0),
             
-            cityTableView.bottomAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: 105)
+            collectionView.topAnchor.constraint(equalTo: generalStackView.bottomAnchor, constant: 10),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
         ]
     }
 }

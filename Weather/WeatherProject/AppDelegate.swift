@@ -9,7 +9,7 @@ import UIKit
 
 let primaryColor = UIColor(red: 227/255, green: 197/255, blue: 159/255, alpha: 1)
 let secondaryColor = UIColor(red: 149/255, green: 192/255, blue: 187/255, alpha: 1)
-//let secondaryColor = UIColor(red: 230/255, green: 145/255, blue: 178/255, alpha: 1)
+let myTintColor = UIColor(red: 27/255, green: 67/255, blue: 72/255, alpha: 1)
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
