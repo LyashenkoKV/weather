@@ -143,16 +143,11 @@ final class MyView: UIView {
     }
 
     private func addTableViewConstraints(to view: UIView) {
-        
         NSLayoutConstraint.activate([
             cityTableView.topAnchor.constraint(equalTo: searchStackView.bottomAnchor, constant: 2),
             cityTableView.leadingAnchor.constraint(equalTo: generalStackView.leadingAnchor, constant: 0),
             cityTableView.trailingAnchor.constraint(equalTo: generalStackView.trailingAnchor, constant: 0),
         ])
-
-//        let tableViewBottomConstraint = cityTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -keyboardFrame.height)
-//        tableViewBottomConstraint.priority = UILayoutPriority(999)
-//        tableViewBottomConstraint.isActive = true
     }
    
     private func addConstraints(to view: UIView) {
@@ -175,7 +170,6 @@ final class MyView: UIView {
             addButton.centerYAnchor.constraint(equalTo: searchStackView.centerYAnchor),
             addButton.trailingAnchor.constraint(equalTo: searchStackView.trailingAnchor, constant: 0),
             addButton.topAnchor.constraint(equalTo: searchStackView.topAnchor, constant: 0),
-            
             
             imageView.heightAnchor.constraint(equalToConstant: 100),
             imageView.widthAnchor.constraint(equalToConstant: 100),
@@ -247,5 +241,18 @@ final class MyView: UIView {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
         ]
+    }
+    
+    func updateTableViewBottomAnchor(parameter: Notification, to view: UIView) {
+        let userInfo = parameter.userInfo
+        let getKeyboardRect = (userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let keyboardFrame = view.convert(getKeyboardRect, to: view.window)
+
+        if parameter.name == UIResponder.keyboardWillHideNotification {
+            cityTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
+        } else {
+            cityTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -keyboardFrame.height - 5).isActive = true
+        }
+        view.layoutIfNeeded()
     }
 }

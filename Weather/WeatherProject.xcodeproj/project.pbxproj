@@ -111,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				245DD38429F7FAC200FDCFE2 /* UIElements.swift */,
+				24D8334129EE93EA0081D85C /* CityTableViewCell.swift */,
 				24E37B052A038FAB00C4B4BF /* CollectionViewCell.swift */,
 				24D8333329DEAD4E0081D85C /* UIViewGradientExtension.swift */,
 			);
@@ -122,7 +123,6 @@
 			children = (
 				2410042D299BFCF6004BE66C /* ViewController.swift */,
 				24100441299BFEDB004BE66C /* WeatherCollectionViewCell.swift */,
-				24D8334129EE93EA0081D85C /* CityTableViewCell.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";

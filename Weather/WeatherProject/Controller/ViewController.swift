@@ -58,6 +58,8 @@ final class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewBottomAnchor(parameter:)),
                                                name: UIResponder.keyboardWillHideNotification, object: nil)
         
+        dismissKeyboard()
+        
         searchBar.delegate = self
         weatherManager.delegate = self
     }
@@ -94,6 +96,12 @@ final class ViewController: UIViewController {
         self.data.append(addData)
         collectionView.reloadData()
     }
+
+    private func dismissKeyboard() {
+        let tapGesture = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
+        tapGesture.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tapGesture)
+    }
     
     // MARK: - tableViewSettings
     fileprivate func tableViewSettings() {
@@ -105,16 +113,7 @@ final class ViewController: UIViewController {
     }
     
     @objc func updateTableViewBottomAnchor(parameter: Notification) {
-        let userInfo = parameter.userInfo
-        let getKeyboardRect = (userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        let keyboardFrame = view.convert(getKeyboardRect, to: view.window)
-
-        if parameter.name == UIResponder.keyboardWillHideNotification {
-            cityTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
-        } else {
-            cityTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -keyboardFrame.height - 5).isActive = true
-        }
-        view.layoutIfNeeded()
+        myView.updateTableViewBottomAnchor(parameter: parameter, to: self.view)
     }
     
     // MARK: - collectionViewSettings
